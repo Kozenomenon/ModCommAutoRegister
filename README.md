@@ -14,7 +14,7 @@ The intent with this is to hopefully spark discussion around mod comm integratio
 - **/ModCommTest**
   - Contains test PGD & Level for PIE 
 - **/ModCommRegInitiator/ModCommReg_Base & /ModCommRegRecipient/ModCommReg_Base**
-  - Base Actor BP to enable Auto Registration process in your Mod
+  - Base Actor BP to enable Auto Registration process in your Mod *(its the same actor both folders)*
   - *this is all you need to copy to your mod for use*
 
 ## First, The Duh
