@@ -1,0 +1,2 @@
+# ModCommAutoRegister
+ Ark Survival Evolved assets for use in creating mods. This provides a base actor BP for creating a singleton that will auto register with another mod's singleton, assuming it is also using the same auto registration process. By registering with each other, the mods will then be able to ensure that requests on the Mod Communication interface are only allowed to modify info relevant to them, via their mod parent folder compared with class paths.

@@ -1,0 +1,56 @@
+HOW IT WORKS
+This describes the mod comm auto-register process.
+
+1) Initiating Mod finds Recipient Mod CCA in CAL Lookup (developer provided). Verifies mod path on actor is as expected. Generates a one-per-mod-once-per-restart unique secret key to use for communicating with this mod. This key is set aside along with the associated mod path (or just mod folder name, i.e. /Game/ModFolder). Then calls Mod Comm Interface on the found Recipient Mod CCA...
+```Request Mod Data Processing 
+key = reg_initial
+in json = 
+{
+	"cal": "{Initiating Mod CCA CAL Tag}",
+	"secret": "{unique-per-mod-initiating-mod-generated-random-each-restart}"
+}
+2) Recipient Mod receives this call sets the info aside to use in a moment. Then generates a single-use secret key, stores it for use along with what Initiating Mod sent, sets timer to call Initiating Mod (short delay should be fine), then returns from interface with the single-use secret. Timer is important because Initiating Mod needs to receive this single-use secret before the next call. 
+```out json = 
+{
+	"result": true/false,
+	"error": "{error text if false result, i.e. bad params, could not locate your CAL/CCA, mod registration already exists but since you actin all suspect trying again its now revoked...}",
+	"singleuse": "{recipient-mod-generated-one-time-use-i-will-call-you}"
+}```
+Initiating Mod receives this single-use secret and stores it in some way so it is associated to the Recipient Mod CAL + the secret it generated for the request. 
+
+After that timer delay...
+3) Recipient Mod, calls back to Initiating Mod using the CAL Tag to find its singleton and sending both the secret it received plus the single-use key it generated for the prior response. 
+```Request Mod Data Processing
+key = reg_callback
+{
+	"cal": "{Recipient Mod CCA CAL Tag}",
+	"secret": "{unique-per-mod-recipient-mod-generated-random-each-restart}",
+	"singleuse": "{same-single-use-key-return-on-initial-call}"
+}```
+4) Initiating Mod verifies the CAL tag and single-use key against what was returned from the initial call. If matches then the secret is stored for that mod's registration along with previously stored mod folder and CAL tag. 
+Then the Initiating Mod returns the same secret it sent originally on the initial call, so the Recipient Mod will know we are legit. 
+```out json = 
+{
+	"result": true/false,
+	"error": "{error text if false result}",
+	"secret": "{same-key-sent-on-original-request}"
+}```
+5) Now both mods know about each other and know what key to use/expect. The key would be used with the 'key' param for Mod Comm interface calls. When either mod receives a call from the other it will know with a fair amount of certainty which mod made the call and what that mod's parent folder is. This parent folder can then be checked against class paths, such as a request to add/block dinos/items/buffs/structures/etc from another mod. This way you can enforce that mods can only request changes for assets that they 'own' based on class path starting with /Game/ModFolder. 
+There would be cases where you would need to use vanilla paths in requests to other mods, but this would be contextually obvious and you can do what you wanna do... _such as letting other mod know about remaps that your mod handles_ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
